@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="src/cClient/cClient.csproj" Id="01f53f53-7bbb-4136-9cc9-d60fcda0a497" />
+  <Project Path="src/Cep/Cep.csproj" Id="f2ce085a-e059-4156-a846-c2063e934206" />
+  <Project Path="test/UnitTest/UnitTest.csproj" Id="cd805d35-6d4a-4520-b94f-5445212c3a31" />
+</Solution>
