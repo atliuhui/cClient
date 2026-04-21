@@ -64,10 +64,13 @@ public sealed class CepRequestMessage
     /// Parses CEP request text into a <see cref="CepRequestMessage"/> instance.
     /// </summary>
     /// <param name="text">Raw CEP request text.</param>
+    /// <param name="expansionVariables">Variables used for placeholder expansion during parse.</param>
     /// <returns>The parsed CEP request message.</returns>
     /// <exception cref="ArgumentNullException">Thrown when <paramref name="text"/> is null, empty, or whitespace.</exception>
     /// <exception cref="FormatException">Thrown when the request text format is invalid.</exception>
-    public static CepRequestMessage Parse(string text)
+    public static CepRequestMessage Parse(
+        string text,
+        IReadOnlyDictionary<string, string>? expansionVariables = null)
     {
         ArgumentNullException.ThrowIfNullOrWhiteSpace(text, nameof(text));
 
@@ -93,7 +96,7 @@ public sealed class CepRequestMessage
                 break;
             }
 
-            ParseHeaderLine(message.Headers, line);
+            ParseHeaderLine(message.Headers, line, expansionVariables);
         }
 
         // ---- Arguments ----
@@ -105,7 +108,7 @@ public sealed class CepRequestMessage
                 continue;
             }
 
-            message.Arguments.Add(ParseArgumentLine(line));
+            message.Arguments.Add(ParseArgumentLine(line, expansionVariables));
         }
 
         return message;
@@ -130,7 +133,10 @@ public sealed class CepRequestMessage
 
         return (parts[0], parts[1], parts[2]);
     }
-    static void ParseHeaderLine(IDictionary<string, string> headers, string line)
+    static void ParseHeaderLine(
+        IDictionary<string, string> headers,
+        string line,
+        IReadOnlyDictionary<string, string>? expansionVariables = null)
     {
         var idx = line.IndexOf(':');
         if (idx <= 0)
@@ -147,9 +153,11 @@ public sealed class CepRequestMessage
         }
 
         // allow empty value, but still store it
-        headers[name] = value.ExpandEnvironmentVariables();
+        headers[name] = value.ExpandVariables(expansionVariables);
     }
-    static CommandArgument ParseArgumentLine(string line)
+    static CommandArgument ParseArgumentLine(
+        string line,
+        IReadOnlyDictionary<string, string>? expansionVariables = null)
     {
         // Normalize leading/trailing whitespace before token parsing.
         var trimmed = line.Trim();
@@ -161,7 +169,7 @@ public sealed class CepRequestMessage
         if (firstWs < 0)
         {
             // Single token argument (e.g., "-y" or "output.mp4")
-            return CommandArgument.Token(trimmed.ExpandEnvironmentVariables());
+            return CommandArgument.Token(trimmed.ExpandVariables(expansionVariables));
         }
 
         var name = trimmed[..firstWs].Trim();
@@ -170,16 +178,16 @@ public sealed class CepRequestMessage
         if (name.Length == 0)
         {
             // Defensive fallback.
-            return CommandArgument.Token(trimmed.ExpandEnvironmentVariables());
+            return CommandArgument.Token(trimmed.ExpandVariables(expansionVariables));
         }
         if (value.Length == 0)
         {
             // "-y " => treat as standalone token, keep as "-y"
-            return CommandArgument.Token(name.ExpandEnvironmentVariables());
+            return CommandArgument.Token(name.ExpandVariables(expansionVariables));
         }
 
         // Named arguments are serialized in "name value" form.
-        return CommandArgument.Named(name, value.ExpandEnvironmentVariables());
+        return CommandArgument.Named(name, value.ExpandVariables(expansionVariables));
     }
 }
 

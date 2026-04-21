@@ -39,12 +39,12 @@ Zero or more `Name: Value` lines, terminated by a blank line. Header names are *
 | Header              | Description                                                   | Example                        |
 |---------------------|---------------------------------------------------------------|--------------------------------|
 | `Working-Directory` | Working directory for process execution.                      | `${USERPROFILE}\Downloads`     |
-| `Timeout`           | Timeout in **seconds**. Process is killed when exceeded.      | `30`                           |
+| `Timeout`           | Timeout in **seconds**. Values less than or equal to `0` mean no timeout. | `30`                           |
 | `Charset`           | Encoding name for stdout/stderr.                              | `GBK`                          |
 
-Header values support environment variable expansion using `${VAR_NAME}` syntax. Unknown variables are kept as-is.
+Header values support `${VAR_NAME}` placeholder expansion. During parsing, placeholders are resolved from parse-time expansion variables first, then from the host process environment. Unknown variables are kept as-is.
 
-If a header name matches the pattern `^[A-Za-z_][A-Za-z0-9_]*$` (i.e. a valid environment variable name), the name and its value will be injected as an environment variable into the child process.
+If a header name matches the pattern `^[A-Za-z_][A-Za-z0-9_]*$` (i.e. a valid environment variable name), the name and its value will be injected into the child process environment. This child process environment is distinct from both parse-time expansion variables and the host process environment used during placeholder expansion.
 
 ### Arguments (payload)
 
@@ -59,7 +59,7 @@ Each non-blank line after the header section represents one argument:
 output.mp4            ← token argument: "output.mp4"
 ```
 
-Argument values also support `${VAR_NAME}` environment variable expansion.
+Argument values also support `${VAR_NAME}` placeholder expansion, using the same resolution order as header values.
 
 ---
 

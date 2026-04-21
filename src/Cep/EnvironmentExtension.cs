@@ -8,12 +8,16 @@ internal static class EnvironmentExtension
     public static readonly Regex NamePattern = new(@"^[A-Za-z_][A-Za-z0-9_]*$", RegexOptions.Compiled);
 
     /// <summary>
-    /// Expands placeholders in the form <c>${NAME}</c> using process environment variables.
+    /// Expands placeholders in the form <c>${NAME}</c> using expansion variables first,
+    /// then process environment variables as fallback.
     /// Unknown or invalid placeholders are kept unchanged.
     /// </summary>
     /// <param name="text">Input text that may contain placeholders.</param>
+    /// <param name="expansionVariables">Variables used for placeholder expansion.</param>
     /// <returns>Text after placeholder expansion.</returns>
-    public static string ExpandEnvironmentVariables(this string text)
+    public static string ExpandVariables(
+        this string text,
+        IReadOnlyDictionary<string, string>? expansionVariables)
     {
         if (string.IsNullOrEmpty(text))
         {
@@ -43,7 +47,8 @@ internal static class EnvironmentExtension
             if (NamePattern.IsMatch(nameSpan))
             {
                 var name = nameSpan.ToString();
-                var value = Environment.GetEnvironmentVariable(name);
+                var value = GetValue(expansionVariables, name)
+                    ?? Environment.GetEnvironmentVariable(name);
                 if (value is not null) sb.Append(value);
                 else sb.Append(s[open..(close + 1)]); // keep ${NAME}
             }
@@ -60,5 +65,30 @@ internal static class EnvironmentExtension
         sb.Append(s[i..]);
 
         return sb.ToString();
+    }
+
+    static string? GetValue(
+        IReadOnlyDictionary<string, string>? expansionVariables,
+        string name)
+    {
+        if (expansionVariables is null)
+        {
+            return null;
+        }
+
+        if (expansionVariables.TryGetValue(name, out var value))
+        {
+            return value;
+        }
+
+        foreach (var (key, candidate) in expansionVariables)
+        {
+            if (string.Equals(key, name, StringComparison.OrdinalIgnoreCase))
+            {
+                return candidate;
+            }
+        }
+
+        return null;
     }
 }

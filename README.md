@@ -35,6 +35,30 @@ When `--log` (or `-l`) is enabled, cClient writes request/response logs to the `
 --version"
 ```
 
+### CLI Options
+
+- `-t`, `--text`: CEP message text input.
+- `-f`, `--file`: CEP message file path input.
+- `-l`, `--log`: write request/response logs under `./logs`.
+- `-e`, `--env`: expansion variable in `KEY=VALUE` format. Repeatable.
+- `--env-file`: env file path for expansion variables in `KEY=VALUE` format.
+
+`--env-file` parsing rules:
+
+- Empty lines are ignored.
+- Lines starting with `#` are treated as comments.
+- Every non-empty line must be `KEY=VALUE`.
+
+When the same key exists in both `--env-file` and `--env`, `--env` overrides `--env-file`.
+
+Examples:
+
+```powershell
+.\cclient.exe run --file request.cep --env-file .env
+.\cclient.exe run --file request.cep -e USER=alice -e REGION=cn
+.\cclient.exe run --file request.cep --env-file .env -e USER=bob
+```
+
 ## CEP Message Overview
 
 A request has three logical sections:
@@ -48,10 +72,10 @@ Headers and arguments are separated by one blank line.
 ### Common Request Headers
 
 - `Working-Directory`: working directory for process execution
-- `Timeout`: timeout in seconds
+- `Timeout`: timeout in seconds, where values less than or equal to `0` mean no timeout
 - `Charset`: stdout/stderr encoding name
 
-Header values support `${VAR_NAME}` expansion. If a header name matches `^[A-Za-z_][A-Za-z0-9_]*$`, it is injected into the child process environment.
+Header values and argument values support `${VAR_NAME}` expansion. During parsing, placeholders are resolved from expansion variables first, then from the host process environment. If a header name matches `^[A-Za-z_][A-Za-z0-9_]*$`, it is injected into the child process environment. These are separate concepts: expansion variables are parse-time inputs, while the child process environment is used only when launching the command.
 
 ### Response Essentials
 

@@ -130,6 +130,23 @@ public sealed class CepClientTest
         Assert.AreEqual(0, response.ExitCode);
     }
     [TestMethod]
+    public async Task Parse_ping()
+    {
+        var variables = new Dictionary<string, string>
+        {
+            ["host"] = "baidu.com",
+        };
+        var request = CepRequestMessage.Parse(File.ReadAllText(@"examples/ping-request.cep", Encoding.UTF8), variables);
+
+        var client = new CepClient();
+        var response = await client.RunAsync(request);
+
+        Console.WriteLine(response.ToString());
+
+        Assert.AreEqual(0, response.ExitCode);
+    }
+
+    [TestMethod]
     public async Task Parse_Response()
     {
         var response = CepResponseMessage.Parse(File.ReadAllText(@"examples/dotnet-response.cep", Encoding.UTF8));

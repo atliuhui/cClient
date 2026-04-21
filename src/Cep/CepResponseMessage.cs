@@ -144,6 +144,6 @@ public sealed class CepResponseMessage
         }
 
         // allow empty value, but still store it
-        headers[name] = value.ExpandEnvironmentVariables();
+        headers[name] = value;
     }
 }

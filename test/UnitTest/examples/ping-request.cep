@@ -1,4 +1,4 @@
 EXEC ping CEP/0.1
 Charset: GBK
 
-baidu.com
+${host}

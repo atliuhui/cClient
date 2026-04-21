@@ -13,6 +13,16 @@ var fileOption = new Option<FileInfo?>("--file", "-f")
 {
     Description = "Path to a text file that contains CEP message text. If provided, --text must not be provided.",
 };
+var envOption = new Option<string[]>("--env", "-e")
+{
+    Description = "Expansion variable in KEY=VALUE format. Repeatable.",
+    Arity = ArgumentArity.ZeroOrMore,
+    AllowMultipleArgumentsPerToken = true,
+};
+var envFileOption = new Option<FileInfo?>("--env-file")
+{
+    Description = "Path to env file for expansion variables in KEY=VALUE format.",
+};
 var logOption = new Option<bool>("--log", "-l")
 {
     Description = "Enable request/response log file output. Default is false.",
@@ -20,12 +30,14 @@ var logOption = new Option<bool>("--log", "-l")
 
 var runCommand = new Command("run", "Execute a CEP request message")
 {
-    Options = { textOption, fileOption, logOption, },
+    Options = { textOption, fileOption, envOption, envFileOption, logOption, },
 };
 runCommand.SetAction(async (parseResult, cancellationToken) =>
 {
     var text = parseResult.GetValue(textOption);
     var file = parseResult.GetValue(fileOption);
+    var envs = parseResult.GetValue(envOption);
+    var envFile = parseResult.GetValue(envFileOption);
     var writeLog = parseResult.GetValue(logOption);
 
     if (file is not null)
@@ -36,22 +48,27 @@ runCommand.SetAction(async (parseResult, cancellationToken) =>
 
     if (!string.IsNullOrWhiteSpace(text))
     {
-        await RunAsync(text, writeLog, cancellationToken);
+        var vars = ExpansionVariableParser.Parse(envs, envFile);
+        await RunAsync(text, vars, writeLog, cancellationToken);
     }
 });
 
 var rootCommand = new RootCommand("CEP Client CLI - execute CEP request messages")
 {
-    Options = { textOption, fileOption, logOption, },
+    Options = { textOption, fileOption, envOption, envFileOption, logOption, },
     Subcommands = { runCommand, },
 };
 
 return rootCommand.Parse(args).Invoke();
 
-static async Task RunAsync(string text, bool writeLog, CancellationToken cancellationToken)
+static async Task RunAsync(
+    string text,
+    IReadOnlyDictionary<string, string> expansionVariables,
+    bool writeLog,
+    CancellationToken cancellationToken)
 {
     var session = DateTime.Now.ToString("yyyyMMddHHmmss");
-    var request = CepRequestMessage.Parse(text);
+    var request = CepRequestMessage.Parse(text, expansionVariables);
     string? logsDirectory = null;
     if (writeLog)
     {
