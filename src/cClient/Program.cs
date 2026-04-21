@@ -7,11 +7,11 @@ using System.Text;
 
 var textOption = new Option<string?>("--text", "-t")
 {
-    Description = "CEP message wire text. If provided, --file must not be provided.",
+    Description = "CEP message text. If provided, --file must not be provided.",
 };
 var fileOption = new Option<FileInfo?>("--file", "-f")
 {
-    Description = "Path to a text file that contains CEP message wire text. If provided, --text must not be provided.",
+    Description = "Path to a text file that contains CEP message text. If provided, --text must not be provided.",
 };
 var logOption = new Option<bool>("--log", "-l")
 {

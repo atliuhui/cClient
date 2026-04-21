@@ -15,6 +15,9 @@
     <None Update="examples\dotnet-request.cep">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="examples\dotnet-response.cep">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="examples\echo-request.cep">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

@@ -129,4 +129,13 @@ public sealed class CepClientTest
 
         Assert.AreEqual(0, response.ExitCode);
     }
+    [TestMethod]
+    public async Task Parse_Response()
+    {
+        var response = CepResponseMessage.Parse(File.ReadAllText(@"examples/dotnet-response.cep", Encoding.UTF8));
+
+        Console.WriteLine(response.ToString());
+
+        Assert.AreEqual(0, response.ExitCode);
+    }
 }

@@ -61,15 +61,15 @@ public sealed class CepRequestMessage
     public override string ToString() => ToText();
 
     /// <summary>
-    /// Parses CEP wire text into a <see cref="CepRequestMessage"/> instance.
+    /// Parses CEP request text into a <see cref="CepRequestMessage"/> instance.
     /// </summary>
-    /// <param name="text">CEP request wire text.</param>
-    /// <returns>A parsed request message.</returns>
-    /// <exception cref="ArgumentNullException">Thrown when <paramref name="text"/> is null or empty.</exception>
-    /// <exception cref="FormatException">Thrown when the wire text format is invalid.</exception>
+    /// <param name="text">Raw CEP request text.</param>
+    /// <returns>The parsed CEP request message.</returns>
+    /// <exception cref="ArgumentNullException">Thrown when <paramref name="text"/> is null, empty, or whitespace.</exception>
+    /// <exception cref="FormatException">Thrown when the request text format is invalid.</exception>
     public static CepRequestMessage Parse(string text)
     {
-        ArgumentNullException.ThrowIfNullOrEmpty(text, nameof(text));
+        ArgumentNullException.ThrowIfNullOrWhiteSpace(text, nameof(text));
 
         using var reader = new StringReader(text);
 
@@ -96,7 +96,7 @@ public sealed class CepRequestMessage
             ParseHeaderLine(message.Headers, line);
         }
 
-        // ---- Arguments (payload) ----
+        // ---- Arguments ----
         while ((line = reader.ReadLine()) is not null)
         {
             // ignore blank lines in argument section
@@ -134,13 +134,17 @@ public sealed class CepRequestMessage
     {
         var idx = line.IndexOf(':');
         if (idx <= 0)
+        {
             throw new FormatException($"Invalid header line: '{line}'. Expected: Name: Value");
+        }
 
         var name = line[..idx].Trim();
         var value = line[(idx + 1)..].Trim();
 
         if (name.Length == 0)
+        {
             throw new FormatException($"Invalid header line: '{line}'. Header name is empty.");
+        }
 
         // allow empty value, but still store it
         headers[name] = value.ExpandEnvironmentVariables();
