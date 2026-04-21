@@ -1,3 +1,4 @@
+# ping example
 EXEC ping CEP/0.1
 Charset: GBK
 

@@ -96,6 +96,11 @@ public sealed class CepRequestMessage
                 break;
             }
 
+            if (IsCommentLine(line))
+            {
+                continue;
+            }
+
             ParseHeaderLine(message.Headers, line, expansionVariables);
         }
 
@@ -104,6 +109,11 @@ public sealed class CepRequestMessage
         {
             // ignore blank lines in argument section
             if (string.IsNullOrWhiteSpace(line))
+            {
+                continue;
+            }
+
+            if (IsCommentLine(line))
             {
                 continue;
             }
@@ -118,7 +128,7 @@ public sealed class CepRequestMessage
         string? line;
         while ((line = reader.ReadLine()) is not null)
         {
-            if (!string.IsNullOrWhiteSpace(line))
+            if (!string.IsNullOrWhiteSpace(line) && IsCommentLine(line) == false)
                 return line;
         }
         return null;
@@ -132,6 +142,10 @@ public sealed class CepRequestMessage
         }
 
         return (parts[0], parts[1], parts[2]);
+    }
+    static bool IsCommentLine(string line)
+    {
+        return line.TrimStart().StartsWith('#');
     }
     static void ParseHeaderLine(
         IDictionary<string, string> headers,
