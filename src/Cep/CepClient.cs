@@ -30,7 +30,7 @@ public class CepClient
     /// <summary>
     /// Default timeout.
     /// </summary>
-    public TimeSpan Timeout { get; set; } = TimeSpan.FromSeconds(100);
+    public TimeSpan Timeout { get; set; } = TimeSpan.Zero;
     /// <summary>
     /// Optional callback invoked for each line received from standard output.
     /// </summary>
@@ -52,7 +52,10 @@ public class CepClient
         var timeout = request.Headers.GetTimeout(this.Timeout);
 
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-        linked.CancelAfter(timeout);
+        if (timeout != TimeSpan.Zero)
+        {
+            linked.CancelAfter(timeout);
+        }
 
         var info = CreateProcessStartInfo(request);
         var stopwatch = Stopwatch.StartNew();

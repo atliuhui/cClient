@@ -27,7 +27,7 @@ internal static class DictionaryExtension
     {
         return (dict.TryGetValue(key, out var value)
             && int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var seconds))
-            ? TimeSpan.FromSeconds(seconds)
+            ? seconds > 0 ? TimeSpan.FromSeconds(seconds) : TimeSpan.Zero
             : defaultValue;
     }
     /// <summary>
