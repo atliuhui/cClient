@@ -46,17 +46,17 @@ jobs:
       matrix:
         include:
           - runtime: win-x64
-            artifact: cclient-${{ github.ref_name }}-win-x64.zip
+            artifact: cclient-win-x64.zip
           - runtime: win-arm64
-            artifact: cclient-${{ github.ref_name }}-win-arm64.zip
+            artifact: cclient-win-arm64.zip
           - runtime: linux-x64
-            artifact: cclient-${{ github.ref_name }}-linux-x64.tar.gz
+            artifact: cclient-linux-x64.tar.gz
           - runtime: linux-arm64
-            artifact: cclient-${{ github.ref_name }}-linux-arm64.tar.gz
+            artifact: cclient-linux-arm64.tar.gz
           - runtime: osx-x64
-            artifact: cclient-${{ github.ref_name }}-osx-x64.tar.gz
+            artifact: cclient-osx-x64.tar.gz
           - runtime: osx-arm64
-            artifact: cclient-${{ github.ref_name }}-osx-arm64.tar.gz
+            artifact: cclient-osx-arm64.tar.gz
 
     steps:
       - name: Checkout Repository
@@ -96,6 +96,7 @@ jobs:
             /p:AssemblyVersion="$APP_VERSION" \
             /p:FileVersion="$APP_VERSION" \
             /p:InformationalVersion="${{ github.ref_name }}" \
+            /p:IncludeSourceRevisionInInformationalVersion=false \
             /p:PublishSingleFile=true \
             /p:EnableCompressionInSingleFile=true \
             /p:DebugSymbols=false \
