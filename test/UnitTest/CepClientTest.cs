@@ -7,6 +7,7 @@ namespace UnitTest;
 public sealed class CepClientTest
 {
     [TestMethod]
+    [TestCategory("CI")]
     public async Task RunAsync_Normal()
     {
         var request = new CepRequestMessage("EXEC", "dotnet", "CEP/0.1");
@@ -94,6 +95,7 @@ public sealed class CepClientTest
     }
 
     [TestMethod]
+    [TestCategory("CI")]
     public async Task Parse_Normal()
     {
         var request = CepRequestMessage.Parse(File.ReadAllText(@"examples/dotnet-request.cep", Encoding.UTF8));
@@ -147,6 +149,7 @@ public sealed class CepClientTest
     }
 
     [TestMethod]
+    [TestCategory("CI")]
     public async Task Parse_Response()
     {
         var response = CepResponseMessage.Parse(File.ReadAllText(@"examples/dotnet-response.cep", Encoding.UTF8));

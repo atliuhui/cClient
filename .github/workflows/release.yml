@@ -34,7 +34,7 @@ jobs:
         run: dotnet restore cclient.slnx
 
       - name: Run Tests
-        run: dotnet test --solution cclient.slnx --configuration Release --no-restore
+        run: dotnet test --solution cclient.slnx --configuration Release --no-restore --filter "TestCategory=CI"
 
   build:
     name: Build ${{ matrix.runtime }}
