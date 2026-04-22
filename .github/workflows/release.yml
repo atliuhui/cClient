@@ -87,6 +87,9 @@ jobs:
             --no-restore \
             --self-contained false \
             /p:PublishSingleFile=true \
+            /p:EnableCompressionInSingleFile=true \
+            /p:DebugSymbols=false \
+            /p:DebugType=None \
             /p:PublishReadyToRun=false \
             --output "artifacts/${{ matrix.runtime }}"
 
