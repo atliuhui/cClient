@@ -6,6 +6,23 @@ namespace Cep;
 internal static class DictionaryExtension
 {
     /// <summary>
+    /// Attempts to assign a computed value to the dictionary and ignores invalid process-state failures.
+    /// </summary>
+    public static void TrySetValue(
+        this IDictionary<string, string> dict,
+        string key,
+        Func<string> factory)
+    {
+        try
+        {
+            dict[key] = factory();
+        }
+        catch
+        {
+        }
+    }
+
+    /// <summary>
     /// Gets a string value by key, or returns the provided default when the key is missing.
     /// </summary>
     public static string GetValueOrDefault(

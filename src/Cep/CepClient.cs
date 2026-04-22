@@ -85,7 +85,7 @@ public class CepClient
             await proc.WaitForExitAsync(linked.Token).ConfigureAwait(false);
             stopwatch.Stop();
 
-            return BuildSuccessResponse(request.Protocol, info, proc, stdout, stderr);
+            return BuildSuccessResponse(request.Protocol, info, startTime, stopwatch.Elapsed, proc, stdout, stderr);
         }
         catch (OperationCanceledException) when (linked.IsCancellationRequested)
         {
@@ -143,6 +143,7 @@ public class CepClient
     }
     CepResponseMessage BuildSuccessResponse(
         string protocol, ProcessStartInfo info,
+        DateTimeOffset startTime, TimeSpan elapsed,
         Process proc, StringBuilder stdout, StringBuilder stderr)
     {
         var response = new CepResponseMessage(protocol, proc.ExitCode)
@@ -152,12 +153,12 @@ public class CepClient
                 : stdout.Length == 0 ? stderr.ToString() : stdout.ToString(),
         };
 
-        response.Headers["Working-Directory"] = info.WorkingDirectory;
-        response.Headers["Process-Id"] = proc.Id.ToString(CultureInfo.InvariantCulture);
-        response.Headers["Start-Time"] = proc.StartTime.ToString("O", CultureInfo.InvariantCulture);
-        response.Headers["Exit-Time"] = proc.ExitTime.ToString("O", CultureInfo.InvariantCulture);
-        response.Headers["Total-Time"] = proc.TotalProcessorTime.ToString();
-        response.Headers["User-Time"] = proc.UserProcessorTime.ToString();
+        response.Headers.TrySetValue("Working-Directory", () => info.WorkingDirectory);
+        response.Headers.TrySetValue("Process-Id", () => proc.Id.ToString(CultureInfo.InvariantCulture));
+        response.Headers.TrySetValue("Start-Time", () => startTime.ToString("O", CultureInfo.InvariantCulture));
+        response.Headers.TrySetValue("Exit-Time", () => DateTimeOffset.Now.ToString("O", CultureInfo.InvariantCulture));
+        response.Headers.TrySetValue("Total-Time", () => elapsed.ToString());
+        response.Headers.TrySetValue("User-Time", () => proc.UserProcessorTime.ToString());
 
         return response;
     }
@@ -170,11 +171,11 @@ public class CepClient
             Payload = string.Empty,
         };
 
-        response.Headers["Working-Directory"] = info.WorkingDirectory;
-        response.Headers["Start-Time"] = startTime.ToString("O", CultureInfo.InvariantCulture);
-        response.Headers["Exit-Time"] = DateTimeOffset.Now.ToString("O", CultureInfo.InvariantCulture);
-        response.Headers["Total-Time"] = elapsed.ToString();
-        response.Headers["Reason"] = "Timeout";
+        response.Headers.TrySetValue("Working-Directory", () => info.WorkingDirectory);
+        response.Headers.TrySetValue("Start-Time", () => startTime.ToString("O", CultureInfo.InvariantCulture));
+        response.Headers.TrySetValue("Exit-Time", () => DateTimeOffset.Now.ToString("O", CultureInfo.InvariantCulture));
+        response.Headers.TrySetValue("Total-Time", () => elapsed.ToString());
+        response.Headers.TrySetValue("Reason", () => "Timeout");
 
         return response;
     }
@@ -187,11 +188,11 @@ public class CepClient
             Payload = string.Empty,
         };
 
-        response.Headers["Working-Directory"] = info.WorkingDirectory;
-        response.Headers["Start-Time"] = startTime.ToString("O", CultureInfo.InvariantCulture);
-        response.Headers["Exit-Time"] = DateTimeOffset.Now.ToString("O", CultureInfo.InvariantCulture);
-        response.Headers["Total-Time"] = elapsed.ToString();
-        response.Headers["Reason"] = "Canceled";
+        response.Headers.TrySetValue("Working-Directory", () => info.WorkingDirectory);
+        response.Headers.TrySetValue("Start-Time", () => startTime.ToString("O", CultureInfo.InvariantCulture));
+        response.Headers.TrySetValue("Exit-Time", () => DateTimeOffset.Now.ToString("O", CultureInfo.InvariantCulture));
+        response.Headers.TrySetValue("Total-Time", () => elapsed.ToString());
+        response.Headers.TrySetValue("Reason", () => "Canceled");
 
         return response;
     }
