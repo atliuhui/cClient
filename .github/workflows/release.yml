@@ -31,7 +31,7 @@ jobs:
             ${{ runner.os }}-nuget-
 
       - name: Restore Dependencies
-        run: dotnet restore --solution cclient.slnx
+        run: dotnet restore cclient.slnx
 
       - name: Run Tests
         run: dotnet test --solution cclient.slnx --configuration Release --no-restore
